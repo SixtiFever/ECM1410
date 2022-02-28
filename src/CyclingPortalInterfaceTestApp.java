@@ -1,7 +1,4 @@
-import cycling.BadCyclingPortal;
-import cycling.BadMiniCyclingPortal;
-import cycling.CyclingPortalInterface;
-import cycling.MiniCyclingPortalInterface;
+import cycling.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,42 +22,33 @@ public class CyclingPortalInterfaceTestApp {
 	 * 
 	 * @param args not used
 	 */
-	public static void main(String[] args) {
-		System.out.println("The system compiled and started the execution...");
+	public static void main(String[] args) throws InvalidNameException, IllegalNameException {
+
+
 
 
 
 		MiniCyclingPortalInterface portal = new BadMiniCyclingPortal();
-//		CyclingPortalInterface portal = new BadCyclingPortal();
+		// CyclingPortalInterface portal = new BadCyclingPortal();
 
-		// instantiating team objects
-		Team Flying_People = new Team();
-		Team TeamB = new Team();
-		Team TeamC = new Team();
+		CyclingPortalInterfaceTestApp test = new CyclingPortalInterfaceTestApp();
 
+		// get race objects via index in the races_list
 
-		// creating team object data and appending to teams ArrayList
-		Flying_People.createTeam("Flying People","We are a team");
-		TeamB.createTeam("Team B", "We are team B");
-		TeamC.createTeam("Team C", "We are team C");
-
-		Flying_People.createRider("Jason", 1994);
-		Flying_People.createRider("Alice", 2001);
-
-		TeamB.createRider("Nat", 1999);
-		TeamB.createRider("Rosie", 2003);
-
-		System.out.println(Team.teams_objects);
-		// System.out.println(Team.teams);
-		System.out.println(Team.team_id);
-		System.out.println(Flying_People.team_riders.get(0).team_id);
-		System.out.println(TeamB.team_riders.get(1).RIDER_ID);
-		System.out.println();
-		System.out.println(Team.teams_objects);
-		Team.removeTeam(1);
-		System.out.println(Team.teams_objects);
+		test.createRace("Race 1", "Race description");
+		test.createRace("Race 2", "Race description");
+		test.addStageToRace(0);
+		test.addStageToRace(0);
+		test.addStageToRace(1);
+		test.addStageToRace(1);
+		Race temp = Race.race_list.get(0);
+		Race temp1 = Race.race_list.get(1);
+		System.out.println(temp.stages.size());
+		System.out.println(temp1.stages.size());
 
 
+		System.out.println(Race.race_count);
+		System.out.println(Race.race_list.get(1).RACE_ID);
 
 
 
@@ -71,4 +59,21 @@ public class CyclingPortalInterfaceTestApp {
 				: "Initial SocialMediaPlatform not empty as required or not returning an empty array.";
 
 	}
+
+	int createRace(String name, String description){
+		Race race_object = new Race(name, description);
+		return race_object.RACE_ID;
+	}
+
+	int addStageToRace(int race_id){
+		Stage stage = new Stage(StageType.FLAT, "Stage1", "Stage description");
+		if(Race.race_list.get(race_id) != null){  // if index isn't empty
+			Race temp = Race.race_list.get(race_id); // store object in temp reference type for manipulation
+			temp.stages.add(stage); // add the instantiated stage to the race object stages array.
+		}
+		int stage_id = Race.race_list.get(race_id).stages.size(); // stage id corresponds to array index
+		return stage_id;
+	}
+
+
 }
