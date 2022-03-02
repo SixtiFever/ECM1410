@@ -45,11 +45,7 @@ public class CyclingPortalInterfaceTestApp {
 		test.addStageToRace(0,"Race 1", "First race", "Stage 1",
 				"First stage" , 20.0, LocalDateTime.now(), StageType.FLAT);
 
-		System.out.println(test.viewRaceDetails(0));
-		System.out.println(test.viewRaceDetails(1));
-		System.out.println(Race.race_list);
-
-
+		System.out.println(Race.race_list.get(0).RACE_ID);
 
 
 
@@ -171,8 +167,9 @@ public class CyclingPortalInterfaceTestApp {
 				" | Number of stages: " + noOfStages + " | Sum of stages: " + totalLength;
 	}
 
+
 	/**
-	 *
+	 * removes race by its name
 	 * */
 	public void removeRaceByName(String raceName){
 		int i;
@@ -186,5 +183,81 @@ public class CyclingPortalInterfaceTestApp {
 			}
 		}
 	}
+
+
+	/**
+	 * instantiates a segment object
+	 * pulls the stageObject at relevant index
+	 * adds segment object to segments struct in Stage instance ArrayList.
+	 * */
+	public int addIntermediateSprintToStage(int stageID, double location){
+		Segment segmentObject = new Segment(stageID, SegmentType.SPRINT ,location );
+		Stage stageObject = Race.race_list.get(0).stages.get(stageID);
+		stageObject.segments.add(segmentObject);
+		return stageObject.segments.size();
+	}
+
+
+	/**
+	 * Adds to race 1 (race_list[0]) at specified stage ID
+	 * Adds to segment list of that stage
+	 * Returns the size of the segments list... which correlates to the segment ID
+	 * */
+	public int addCategorizedClimbToStage(int stageID, double location, SegmentType type, double averageGradient, double length){
+		// stage object to add to
+		Stage stageObject = Race.race_list.get(0).stages.get(stageID);  // since index and stageID are the same
+		Segment segmentObject = new Segment(stageID, type, location);
+		segmentObject.averageGradient = averageGradient;
+		segmentObject.length = length;
+		stageObject.segments.add(segmentObject); // adding new segment to segment struct in the stage
+		return stageObject.segments.size();
+	}
+
+
+	/**
+	 * removes the segment from the first race, and first stage within the race.
+	 * Can be altered via hardcoding
+	 * */
+	public void removeSegment(int segmentID) {
+		Stage stageObject = Race.race_list.get(0).stages.get(0);
+		stageObject.segments.remove(segmentID);
+		return;
+	}
+
+
+	/**
+	 * isolates stage object
+	 * uses for loop to iterate stage segments, and add to new array of type int[]
+	 * returns stageSegments[];
+	 * */
+	public int[] getStageSegments(int stageID){
+		Stage stageObject = Race.race_list.get(0).stages.get(stageID);
+		int[] stageSegments = new int[stageObject.segments.size()];
+		int i;
+		for(i = 0; i < stageObject.segments.size(); i++) {
+			stageSegments[i] = stageObject.segments.get(i).stageID;
+		}
+		return stageSegments;
+	}
+
+
+	/**
+	 * returns the number of stages for a race
+	 * */
+	public int getNumberOfStages(int raceID){
+		Race raceObject = Race.race_list.get(raceID);
+		int noOfStages = raceObject.stages.size();
+		return noOfStages;
+	}
+
+
+	/**
+	 * ridiculously vague method.... No idea what to put in here.
+	 * */
+	public void concludeStagePreparation(int stageID){
+		Stage stageObject = Race.race_list.get(0).stages.get(stageID);
+	}
+
+
 
 }

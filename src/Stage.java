@@ -1,6 +1,7 @@
 import cycling.StageType;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 public class Stage extends Race {
 
@@ -10,6 +11,8 @@ public class Stage extends Race {
     double length;
     LocalDateTime start_time;
     public int stageID; // Every stage crated will assign int of size of stages array. i.e 0 --> X
+
+    ArrayList<Segment> segments = new ArrayList<>();
 
     /**
      * CONSTRUCTOR
@@ -26,4 +29,7 @@ public class Stage extends Race {
     }
 
 
+    public Stage() {
+
+    }
 }
