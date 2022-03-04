@@ -263,10 +263,15 @@ public class CyclingPortalInterfaceTestApp {
 	}
 
 
+
+
 	/**
 	 *  TEAMS
 	 * */
 
+
+
+	
 	public int createTeam(String teamName, String teamDescription){
 		Team1 team = new Team1(teamName, teamDescription);
 		int teamID = 0;
@@ -342,6 +347,37 @@ public class CyclingPortalInterfaceTestApp {
 		}
 	}
 
+
+	/**
+	 * extracts teamID's from the team objects in the teams list
+	 * */
+	public int[] getTeams() {
+		int i;
+		int[] teamIDArray = new int[Team1.team_list.size()];
+		for( i = 0; i < Team1.team_list.size(); i++ ) {
+			int teamID = Team1.team_list.get(i).teamID;
+			teamIDArray[i] = teamID;
+		}
+		return teamIDArray;
+	}
+
+
+	/**
+	 * iterate through team members array of a given teamID
+	 * return riders of the team
+	 */
+	public int[] getTeamRiders(int teamID) {
+		int i;
+		Team1 teamObject = getObjectWithTeamID(teamID);
+		int[] teamRiderIDs = new int[teamObject.teamMembers.size()];
+		for( i = 0; i < teamRiderIDs.length; i++ ){
+			teamRiderIDs[i] = teamObject.teamMembers.get(i).riderID;
+		}
+		return teamRiderIDs;
+	}
+
+
+
 	/** EXTRA METHODS */
 
 
@@ -367,6 +403,7 @@ public class CyclingPortalInterfaceTestApp {
 		}
 		return false;
 	}
+
 
 	public Team1 getObjectWithTeamID(int teamID){
 		int i;
