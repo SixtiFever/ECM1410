@@ -1,10 +1,13 @@
 import cycling.*;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.*;
+import java.util.stream.IntStream;
 
 /**
  * A short program to illustrate an app testing some minimal functionality of a
@@ -34,56 +37,102 @@ public class CyclingPortalInterfaceTestApp {
 
 		CyclingPortalInterfaceTestApp test = new CyclingPortalInterfaceTestApp();
 
-		test.createTeam("Team A", "We are team A!");
-		test.createTeam("Team B", "We are team B!");
+		test.createRace("Race A", "This is race A");
+		test.createRace("Race B", "This is race B");
+		test.addStageToRace(1, "Stage 1", "This is the first stage", 10.0
+				, LocalDateTime.now() ,StageType.FLAT);
+		test.addStageToRace(1, "Stage 2", "This is the second stage", 15.0
+				, LocalDateTime.now() ,StageType.FLAT);
 
-		Team1 team1 = Team1.team_list.get(0);
+		System.out.println(Race1.allRaces);
+		System.out.println();
 
-		System.out.println(team1.teamMembers.size());
-		System.out.println();
-		test.createRider(1, "Jason", 1994);
-		test.createRider(1, "Jason", 1994);
-		System.out.println();
-		for( int i = 0; i < team1.teamMembers.size(); i++ ){
-			System.out.println(team1.teamMembers.get(i).riderID);
+		Race1 raceObject = Race1.allRaces.get(0);
+
+		for( int i = 0; i < raceObject.stagesInRace.size(); i++ ){
+			System.out.println(raceObject.stagesInRace.get(i).stageName);
+			System.out.println(raceObject.stagesInRace.get(i).stageDescription);
+			System.out.println(raceObject.stagesInRace.get(i).stageID);
+			System.out.println(raceObject.stagesInRace.get(i).length);
+			System.out.println();
 		}
 
-		test.removeRider(11);
+		System.out.println(test.viewRaceDetails(1));
 		System.out.println();
-		for( int i = 0; i < team1.teamMembers.size(); i++ ){
-			System.out.println(team1.teamMembers.get(i).riderID);
-		}
+		System.out.println(test.getStageLength(11));
+		System.out.println();
+		test.addCategorisedClimb(11, 40.0, SegmentType.HC, 77.0, 100.0);
+		test.addCategorisedClimb(11, 40.0, SegmentType.HC, 77.0, 100.0);
+
+		System.out.println(Race1.allRaces.get(0).stagesInRace.get(0).stageSegments.get(0).segmentID);
+		System.out.println(Race1.allRaces.get(0).stagesInRace.get(0).stageSegments.get(1).segmentID);
 
 		assert (portal.getRaceIds().length == 0)
 				: "Initial SocialMediaPlatform not empty as required or not returning an empty array.";
 
 	}
 
-	int createRace(String name, String description){
-		Race race_object = new Race(name, description);
-		return race_object.RACE_ID;
-	}
 
-	/**
-	 * Removes from static race_list member in race class
+	/** RACE METHODS */
+
+
+	/** NEW
+	 * creates a new race object and adds to allRaces.
+	 * assigns raceID of the allRaces.size()
 	 * */
-	public void removeRaceByID(int raceID){
-		Race.race_list.remove(raceID);
+	public int createRace(String name, String description) {
+		Race1 race = new Race1(name, description);
+		Race1.allRaces.add(race);
+		race.raceID = Race1.allRaces.size();
+		return race.raceID;
 	}
 
-	int addStageToRace(int race_id, String raceName, String raceDescription, String stageName,
-					   String stageDescription, double length, LocalDateTime startTime, StageType type){
-		Stage stage = new Stage(raceName, raceDescription,
-				stageName, stageDescription, length, startTime, type);
-		if(Race.race_list.get(race_id) != null){  // if index isn't empty
-			Race temp = Race.race_list.get(race_id); // store object in temp reference type for manipulation
-			temp.stages.add(stage); // add the instantiated stage to the instance stages array.
-		}
-		stage.stageID = Race.race_list.get(race_id).stages.size();
+
+	/** NEW
+	 * adds a stage to the race -> Get race object via getRaceWithID(raceID)
+	 * add to stages list in race object
+	 * returns concat of raceID and stageList.size()
+	 * */
+	public int addStageToRace(int raceID, String stageName, String stageDescription, double length, LocalDateTime startTime, StageType type){
+		Stage1 stage = new Stage1(stageName, stageDescription, type); // create a new stage object
+		stage.length = length;
+		stage.startTime = startTime;
+		Race1 raceObject = getRaceWithID(raceID); // grab race to add to
+		raceObject.stagesInRace.add(stage); // add to stages in race
+		// Assign stage ID
+		String stringRaceID = Integer.toString(raceID);
+		String stringStageID = Integer.toString(raceObject.stagesInRace.size());
+		String stageID = stringRaceID + stringStageID;
+		stage.stageID = Integer.parseInt(stageID);
 		return stage.stageID;
 	}
 
-	/**
+	/** NEW
+	 * Removes from static race_list member in race class
+	 * */
+	public void removeRaceByID(int raceID){
+		Race1.allRaces.remove(raceID);
+	}
+
+
+	/** NEW
+	 * iterates allRaces, extracts race with argument raceName. Removes from ArrayList.
+	 * */
+	public void removeRaceByName(String raceName){
+		int i;
+		for( i = 0; i < Race1.allRaces.size(); i++ ){
+			if( raceName == Race1.allRaces.get(i).raceName){
+				Race1.allRaces.remove(i);
+				return;
+			}
+		}
+		System.out.println("Race not found....");
+		return;
+	}
+
+
+	/** NEW
+	 *
 	 * getRaceStages
 	 * Takes in raceID and returns an array of stageID from that race.
 	 * Uses if statement to ensure that raceID exists. If invalid raceID is input, returns out
@@ -94,16 +143,16 @@ public class CyclingPortalInterfaceTestApp {
 	 * */
 	public int[] getRaceStages(int raceID){
 		int i;
-		if(Race.race_list.size() < raceID){
+		if(Race1.allRaces.size() < raceID){
 			System.out.println("raceID exceeds number of races... Try another ID");
 			return new int[0];
 		}
-		Race raceObject = Race.race_list.get(raceID);
-		int[] race_stages = new int[raceObject.stages.size()];
+		Race1 raceObject = getRaceWithID(raceID);
+		int[] race_stages = new int[raceObject.stagesInRace.size()];
 		try{
-			race_stages = new int[raceObject.stages.size()];
+			race_stages = new int[raceObject.stagesInRace.size()];
 			for(i = 0; i < race_stages.length; i++){
-				race_stages[i] = raceObject.stages.get(i).stageID;
+				race_stages[i] = raceObject.stagesInRace.get(i).stageID;
 			}
 		} catch (IndexOutOfBoundsException iob){
 			System.out.println("Index issue: " + iob);
@@ -112,145 +161,142 @@ public class CyclingPortalInterfaceTestApp {
 	}
 
 
-	/**
-	 * By default, removes stages from the race at [0] in races_list.
-	 * Hardcode this to remove ID from stages from a different race
+	/** NEW
+	 * Iterated a nested for-loop in search of stageID. If found... removes
 	 * */
 	public void removeStageByID(int stageID) {
-		try{
-			Race raceObject = Race.race_list.get(0);
-			raceObject.stages.remove(stageID);
-		} catch (IndexOutOfBoundsException iob){
-			System.out.println("Index issue: " + iob);
+		int i,j;
+
+		for( i = 0; i < Race1.allRaces.size(); i++ ) {
+			Race1 raceObject = Race1.allRaces.get(i);
+			for (j = 0; j < raceObject.stagesInRace.size(); j++) {
+				if (stageID == raceObject.stagesInRace.get(j).stageID) {
+					raceObject.stagesInRace.remove(j);
+				}
+			}
 		}
-		return;
 	}
 
 
+	/**  NEW
+	 * nested for loop to iterate all races and then stage list until matched a stageID
+	 * returns the length of that stage ID
+	 * */
+	public double getStageLength(int stageID) {
+		int i,j;
+		double length = 0.0;
+
+		for( i = 0; i < Race1.allRaces.size(); i++) {
+			Race1 raceObject = Race1.allRaces.get(i);
+			for( j = 0; j < raceObject.stagesInRace.size(); j++ ){
+				if( stageID == raceObject.stagesInRace.get(j).stageID ) {
+					length = raceObject.stagesInRace.get(j).length;
+					break;
+				}
+			}
+		}
+		return length;
+	}
+
+
+
+	/** NEW */
+
 	/**
-	 * Default: operates on race at index race_list[0]. Can change in method if desired
+	 * argument = raceID --> find from race_list
+	 * sumOfStages gives total length of all stages
+	 * returns all as a String
+	 * */
+	public String viewRaceDetails(int raceID) {
+
+		Race1 raceObject = getRaceWithID(raceID);
+
+		return "Race ID : " + raceObject.raceID + " | Race name: " + raceObject.raceName + " | Race Description: " + raceObject.raceDescription
+				+ " | Number of stages: " + raceObject.stagesInRace.size() + " | Total length: " + raceObject.sumOfstages();
+	}
+
+
+	/** NEW
 	 *
 	 * */
-	public double getStageLength(int stageID){
-		double stage_length = 0.0;
-		try {
-			Race raceObject = Race.race_list.get(0);
-			Stage stageObject = raceObject.stages.get(stageID);
-			stage_length = stageObject.length;
-		} catch(IndexOutOfBoundsException iob){
-			System.out.println("Index issue: " + iob);
-		}
-		return stage_length;
+	public int addIntermediateSprintToStage(int stageID, double location) {
+		Stage1 stageObject = locateStageObject(stageID);
+		Segment1 segObject = new Segment1(location);
+		stageObject.stageSegments.add(segObject);
+
+		// creating segID via concatenation to stageIDs
+		String segIDString = String.valueOf(stageID) + String.valueOf(stageObject.stageSegments.size());
+		int segID = Integer.parseInt(segIDString);
+		segObject.segmentID = segID;
+		return segID;
+
 	}
 
-	/**
-	 * returns a string of the race details
-	 * nested in try-catch to catch index issues
+
+
+	/** NEW
+	 *
 	 * */
-	public String viewRaceDetails(int raceID){
-		Race raceObject;
-		String raceName = "";
-		String raceDescription = "";
-		int ID = 0;
-		int noOfStages = 0;
-		double totalLength = 0.0;
-		try {
-			raceObject = Race.race_list.get(raceID);
-			raceName = raceObject.getRaceName();
-			raceDescription = raceObject.getRaceDescription();
-			ID = raceObject.RACE_ID;
-			noOfStages = raceObject.stages.size();
-			totalLength = 0.0;
-			for(int i = 0; i < noOfStages; i++){
-				totalLength = totalLength + raceObject.stages.get(i).length;
-			}
-		} catch (IndexOutOfBoundsException iob){
-			System.out.println("Index issues in race_list: " + iob);
-		}
-		return "Race Name: " + raceName + " | Race Description: " + raceDescription + " | Race ID: " + ID +
-				" | Number of stages: " + noOfStages + " | Sum of stages: " + totalLength;
+	public int addCategorisedClimb(int stageID, double location, SegmentType type, double averageGradient, double length ) {
+		Stage1 stageObject = locateStageObject(stageID);  // grabbing correct stage object
+		Segment1 segObject = new Segment1(location);  // instantiating segment instance
+		segObject.segType = type;
+		segObject.averageGradient = averageGradient;
+		segObject.length = length;
+		stageObject.stageSegments.add(segObject);  // adding segment to segment list in stage
+
+		// createing segID via concatonation to stageID
+		String segIDString = String.valueOf(stageID) + String.valueOf(stageObject.stageSegments.size());
+		int segID = Integer.parseInt(segIDString);
+		segObject.segmentID = segID;
+		return segID;
 	}
 
 
-	/**
-	 * removes race by its name
-	 * */
-	public void removeRaceByName(String raceName){
-		int i;
-		for( i = 0; i < Race.race_list.size(); i++ ){
-			if( raceName == Race.race_list.get(i).getRaceName()){
-				Race.race_list.remove(i);
-			}
-			if( raceName != Race.race_list.get(i).getRaceName() && i == Race.race_list.size() ) {
-				System.out.println("Race name couldn't be found");
-				break;
-			}
-		}
-	}
-
-
-	/**
-	 * instantiates a segment object
-	 * pulls the stageObject at relevant index
-	 * adds segment object to segments struct in Stage instance ArrayList.
-	 * */
-	public int addIntermediateSprintToStage(int stageID, double location){
-		Segment segmentObject = new Segment(stageID, SegmentType.SPRINT ,location );
-		Stage stageObject = Race.race_list.get(0).stages.get(stageID);
-		stageObject.segments.add(segmentObject);
-		return stageObject.segments.size();
-	}
-
-
-	/**
-	 * Adds to race 1 (race_list[0]) at specified stage ID
-	 * Adds to segment list of that stage
-	 * Returns the size of the segments list... which correlates to the segment ID
-	 * */
-	public int addCategorizedClimbToStage(int stageID, double location, SegmentType type, double averageGradient, double length){
-		// stage object to add to
-		Stage stageObject = Race.race_list.get(0).stages.get(stageID);  // since index and stageID are the same
-		Segment segmentObject = new Segment(stageID, type, location);
-		segmentObject.averageGradient = averageGradient;
-		segmentObject.length = length;
-		stageObject.segments.add(segmentObject); // adding new segment to segment struct in the stage
-		return stageObject.segments.size();
-	}
-
-
-	/**
+	/** NEW
 	 * removes the segment from the first race, and first stage within the race.
 	 * Can be altered via hardcoding
 	 * */
-	public void removeSegment(int segmentID) {
-		Stage stageObject = Race.race_list.get(0).stages.get(0);
-		stageObject.segments.remove(segmentID);
-		return;
+	public void removeSegment(int segID) {
+		int i,j,k;
+		for( i = 0; i < Race1.allRaces.size(); i++ ){
+			Race1 raceObject = Race1.allRaces.get(i);
+			for( j = 0; j < raceObject.stagesInRace.size(); j++ ){
+				Stage1 stageObject = raceObject.stagesInRace.get(j);
+				for( k = 0; k < stageObject.stageSegments.size(); k++ ){
+					Segment1 segObject = stageObject.stageSegments.get(k);
+					if( segID == segObject.segmentID) {
+						stageObject.stageSegments.remove(k);
+					}
+				}
+			}
+		}
 	}
 
 
-	/**
+
+	/** NEW
 	 * isolates stage object
 	 * uses for loop to iterate stage segments, and add to new array of type int[]
 	 * returns stageSegments[];
 	 * */
 	public int[] getStageSegments(int stageID){
-		Stage stageObject = Race.race_list.get(0).stages.get(stageID);
-		int[] stageSegments = new int[stageObject.segments.size()];
+		Stage1 stageObject = locateStageObject(stageID);
+		int[] stageSegments = new int[stageObject.stageSegments.size()];
 		int i;
-		for(i = 0; i < stageObject.segments.size(); i++) {
-			stageSegments[i] = stageObject.segments.get(i).stageID;
+		for(i = 0; i < stageObject.stageSegments.size(); i++) {
+			stageSegments[i] = stageObject.stageSegments.get(i).segmentID;
 		}
 		return stageSegments;
 	}
 
 
-	/**
+	/** NEW
 	 * returns the number of stages for a race
 	 * */
 	public int getNumberOfStages(int raceID){
-		Race raceObject = Race.race_list.get(raceID);
-		int noOfStages = raceObject.stages.size();
+		Race1 raceObject = getRaceWithID(raceID);
+		int noOfStages = raceObject.stagesInRace.size();
 		return noOfStages;
 	}
 
@@ -271,7 +317,7 @@ public class CyclingPortalInterfaceTestApp {
 
 
 
-	
+
 	public int createTeam(String teamName, String teamDescription){
 		Team1 team = new Team1(teamName, teamDescription);
 		int teamID = 0;
@@ -378,6 +424,23 @@ public class CyclingPortalInterfaceTestApp {
 
 
 
+
+	/** RESULT RECORDING */
+
+	/**
+	 * params: riderID, stageID, LocalTime array of times
+	 * put times into hashmap??
+	 * */
+	public void registerRiderResultsInStage(int stageID, int riderID, LocalDateTime[] arrayOfTimes) {
+		Stage1 stageObject = locateStageObject(stageID); // stage instance
+		Rider1 riderObject = findRider(riderID); // rider instance
+		Integer wrappedRiderID = riderObject.riderID;
+		Long seconds = ChronoUnit.SECONDS.between(arrayOfTimes[-1], arrayOfTimes[0]);
+		stageObject.riderTime.put(wrappedRiderID, seconds);
+	}
+
+
+
 	/** EXTRA METHODS */
 
 
@@ -410,6 +473,45 @@ public class CyclingPortalInterfaceTestApp {
 		for( i = 0; i < Team1.team_list.size(); i++ ){
 			if( teamID == Team1.team_list.get(i).teamID){
 				return Team1.team_list.get(i);
+			}
+		}
+		return null;
+	}
+
+	public Race1 getRaceWithID(int raceID) {
+		int i;
+		for( i = 0; i < Race1.allRaces.size(); i++ ){
+			if( raceID == Race1.allRaces.get(i).raceID ){
+				return Race1.allRaces.get(i);
+			}
+		}
+		return null;
+	}
+
+	public Stage1 locateStageObject( int stageID ) {
+		int i,j;
+		for( i = 0; i < Race1.allRaces.size(); i++ ){
+			Race1 raceObject = Race1.allRaces.get(i);
+			for ( j = 0; j < raceObject.stagesInRace.size(); j++ ) {
+				if( stageID == raceObject.stagesInRace.get(j).stageID ) {
+					return raceObject.stagesInRace.get(j);
+				} else {
+					System.out.println("StageID not locatable...");
+				}
+			}
+		}
+		return null;
+	}
+
+
+	public Rider1 findRider(int riderID) {
+		int i,j;
+		for( i = 0; i < Team1.team_list.size(); i++ ){
+			Team1 team = Team1.team_list.get(i);
+			for( j = 0; j < team.teamMembers.size(); j++ ){
+				if( riderID == team.teamMembers.get(j).riderID){
+					return team.teamMembers.get(j);
+				}
 			}
 		}
 		return null;
