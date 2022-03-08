@@ -6,6 +6,8 @@ public class Rider1 {
     String riderName;
     int riderID;
 
+    ArrayList<Integer> stageSecondsByIndex = new ArrayList<>();
+
     Rider1(String riderName, int yearOfBirth){
         this.riderName = riderName;
         this.yearOfBirth = yearOfBirth;

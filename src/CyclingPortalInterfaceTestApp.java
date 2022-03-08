@@ -37,35 +37,28 @@ public class CyclingPortalInterfaceTestApp {
 
 		CyclingPortalInterfaceTestApp test = new CyclingPortalInterfaceTestApp();
 
+		test.createTeam("XXX", "We are XXX...");
+		test.createRider(1, "Jason",1994);
+
 		test.createRace("Race A", "This is race A");
-		test.createRace("Race B", "This is race B");
-		test.addStageToRace(1, "Stage 1", "This is the first stage", 10.0
-				, LocalDateTime.now() ,StageType.FLAT);
-		test.addStageToRace(1, "Stage 2", "This is the second stage", 15.0
-				, LocalDateTime.now() ,StageType.FLAT);
+		Race1 raceObject = test.getRaceWithID(1);
 
-		System.out.println(Race1.allRaces);
-		System.out.println();
+		test.addStageToRace(1, "Stage A", "This is stage A", 50.0, LocalDateTime.now(), StageType.FLAT);
+		test.addStageToRace(1, "Stage A", "This is stage A", 50.0, LocalDateTime.now(), StageType.FLAT);
+		test.addStageToRace(1, "Stage A", "This is stage A", 50.0, LocalDateTime.now(), StageType.FLAT);
 
-		Race1 raceObject = Race1.allRaces.get(0);
+		test.addIntermediateSprintToStage(11, 10.0);
+		test.addIntermediateSprintToStage(11, 10.0);
+		test.addIntermediateSprintToStage(11, 10.0);
 
-		for( int i = 0; i < raceObject.stagesInRace.size(); i++ ){
-			System.out.println(raceObject.stagesInRace.get(i).stageName);
-			System.out.println(raceObject.stagesInRace.get(i).stageDescription);
-			System.out.println(raceObject.stagesInRace.get(i).stageID);
-			System.out.println(raceObject.stagesInRace.get(i).length);
-			System.out.println();
-		}
+		Stage1 stage = raceObject.stagesInRace.get(0);
 
-		System.out.println(test.viewRaceDetails(1));
-		System.out.println();
-		System.out.println(test.getStageLength(11));
-		System.out.println();
-		test.addCategorisedClimb(11, 40.0, SegmentType.HC, 77.0, 100.0);
-		test.addCategorisedClimb(11, 40.0, SegmentType.HC, 77.0, 100.0);
+		test.registerRiderResultsInStage(11, 11, new LocalTime[]{LocalTime.of(10,00,00), LocalTime.of(12, 00,00), LocalTime.of(14,00,00)});
+		System.out.println(stage.riderTime.get(11));
+		System.out.println(stage.riderTime.get(11)[0]);
+		System.out.println(stage.riderTime.get(11)[1]);
+		System.out.println(stage.riderTime.get(11)[2]);
 
-		System.out.println(Race1.allRaces.get(0).stagesInRace.get(0).stageSegments.get(0).segmentID);
-		System.out.println(Race1.allRaces.get(0).stagesInRace.get(0).stageSegments.get(1).segmentID);
 
 		assert (portal.getRaceIds().length == 0)
 				: "Initial SocialMediaPlatform not empty as required or not returning an empty array.";
@@ -424,20 +417,152 @@ public class CyclingPortalInterfaceTestApp {
 
 
 
-
 	/** RESULT RECORDING */
 
 	/**
 	 * params: riderID, stageID, LocalTime array of times
-	 * put times into hashmap??
+	 * HashMap --> RiderID : Time to complete stage (seconds)
 	 * */
-	public void registerRiderResultsInStage(int stageID, int riderID, LocalDateTime[] arrayOfTimes) {
+	public void registerRiderResultsInStage(int stageID, int riderID, LocalTime[] checkpoints) {
 		Stage1 stageObject = locateStageObject(stageID); // stage instance
 		Rider1 riderObject = findRider(riderID); // rider instance
 		Integer wrappedRiderID = riderObject.riderID;
-		Long seconds = ChronoUnit.SECONDS.between(arrayOfTimes[-1], arrayOfTimes[0]);
-		stageObject.riderTime.put(wrappedRiderID, seconds);
+
+		if (checkpoints.length > stageObject.stageSegments.size()){
+			System.out.println("Checkpoint count exceeds segments... Reduce checkpoint input count.");
+			return;
+		}
+
+		LocalTime[] internalTimes = new LocalTime[stageObject.stageSegments.size()];
+
+		int i;
+		for( i = 0; i < stageObject.stageSegments.size(); i++ ){
+			internalTimes[i] = checkpoints[i];
+		}
+
+		// adding results to int[] array of the stage
+		Long seconds = ChronoUnit.SECONDS.between( checkpoints[0] , checkpoints[checkpoints.length-1] );
+		stageObject.riderResults.add(Math.toIntExact(seconds));
+		stageObject.rankedRiderTimes.add(Math.toIntExact(seconds));
+		Collections.sort(stageObject.riderResults);
+		Collections.sort(stageObject.rankedRiderTimes);
+		int indexOfResult = stageObject.riderResults.indexOf(Math.toIntExact(seconds));
+		stageObject.riderResults.set(indexOfResult, riderID);
+		stageObject.riderTime.put(wrappedRiderID, internalTimes);  // HashMap
 	}
+
+
+	/**
+	 * returns the LocalTime[] checkpoint times of the rider in that stage
+	 * */
+	public LocalTime[] getRiderResultsInStage(int stageID, int riderID) {
+		Stage1 stageObject = locateStageObject(stageID);
+		if( stageObject.riderTime.get(riderID) == null ){
+			return new LocalTime[0];
+		}
+		return stageObject.riderTime.get(riderID);
+	}
+
+
+	/**
+	 * converts second into seconds of the day
+	 * */
+	public LocalTime getRiderAdjustedElapsedTimeInStage(int stageID, int riderID){
+		Stage1 stageObject = locateStageObject(stageID);
+		LocalTime[] riderTimes = stageObject.riderTime.get(riderID);
+		Long seconds = ChronoUnit.SECONDS.between(riderTimes[0], riderTimes[riderTimes.length-1]);
+		return LocalTime.ofSecondOfDay(seconds);
+	}
+
+
+	/**
+	 * delete rider in stage HashMap
+	 * */
+	public void deleteRiderResultsInStage(int stageID, int riderID) {
+		Stage1 stageObject = locateStageObject(stageID);
+		stageObject.riderTime.remove(riderID);
+	}
+
+
+	/**
+	 * getRidersRanks
+	 *
+	 * */
+	public int[] getRidersRankInStage(int stageID){
+		Stage1 stageObject = locateStageObject(stageID);
+		int[] riderResulstsArray = new int[200];
+		int i;
+		for( i = 0; i < stageObject.riderResults.size(); i++ ){
+			riderResulstsArray[i] = stageObject.riderResults.get(i);
+		}
+		return riderResulstsArray;
+	}
+
+
+	public int[] getRankedAdjustedElapsedTimeInStage(int stageID) {
+		Stage1 stageObject = locateStageObject(stageID);
+		int[] riderTimes = new int[stageObject.rankedRiderTimes.size()];
+		int i;
+		for( i = 0; i < stageObject.rankedRiderTimes.size(); i++ ) {
+			riderTimes[i] = stageObject.rankedRiderTimes.get(i);
+		}
+		return riderTimes;
+	}
+
+
+	/** getRidersPointsInStage
+	 * Allocate rider points based on their position in the rankedRiderTimes array.
+	 * Check stageType and position --> Then allocate required points
+	 * return the list
+	 * */
+
+	public int[] getRidersPointsInStage(int stageID) {
+		Stage1 stageObject = locateStageObject(stageID);
+		int[] riderPoints = new int[stageObject.rankedRiderTimes.size()];
+		int i;
+		for( i = 0; i < stageObject.rankedRiderTimes.indexOf(14); i++){
+			riderPoints[i] = stageObject.rankedRiderTimes.get(i);
+			return riderPoints;
+		}
+		return new int[0];
+	}
+
+
+	/**
+	 * get mountain points
+	 * */
+	public int[] getRidersMountainPointsInStage(int stageID) {
+		Stage1 stageObject = locateStageObject(stageID);
+		int[] riderMountainPoints = new int[stageObject.rankedRiderTimes.size()];
+		int i;
+		for( i = 0; i < stageObject.rankedRiderTimes.indexOf(14); i++){
+			riderMountainPoints[i] = stageObject.rankedRiderTimes.get(i);
+			return riderMountainPoints;
+		}
+		return new int[0];
+	}
+
+
+	public void eraseCyclingPortal(){
+		int i, j;
+		for( i = 0; i < Race1.allRaces.size(); i++ ){
+			Race1 raceObject = Race1.allRaces.get(i);
+			for( j = 0; i < raceObject.stagesInRace.size(); j++ ){
+				Stage1 stageObject = raceObject.stagesInRace.get(j);
+				stageObject.rankedRiderTimes.clear();
+				stageObject.stageSegments.clear();
+				stageObject.riderResults.clear();
+				stageObject.riderTime.clear();
+				raceObject.stagesInRace.remove(j);
+			}
+		}
+		Race1.allRaces.clear();
+	}
+
+
+
+
+
 
 
 
