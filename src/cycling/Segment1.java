@@ -1,3 +1,5 @@
+package cycling;
+
 import cycling.SegmentType;
 
 public class Segment1 {

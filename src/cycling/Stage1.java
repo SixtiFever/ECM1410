@@ -1,3 +1,6 @@
+package cycling;
+
+import cycling.Segment1;
 import cycling.StageType;
 
 import java.time.LocalDateTime;

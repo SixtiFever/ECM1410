@@ -1,3 +1,5 @@
+package cycling;
+
 import java.util.ArrayList;
 
 public class Rider1 {
@@ -16,7 +18,7 @@ public class Rider1 {
 
     public static void addRiderToTeam(int teamID, Rider1 rider) {
         int i;
-        for( i = 0; i < Team1.team_list.size(); i ++) {
+        for(i = 0; i < Team1.team_list.size(); i ++) {
             if(teamID == Team1.team_list.get(i).teamID){
                 Team1 teamObject = Team1.team_list.get(i);
                 teamObject.teamMembers.add(rider);
@@ -36,7 +38,7 @@ public class Rider1 {
      * */
     public static boolean checkForTeamID(int teamID){
         int i;
-        for( i = 0; i < Team1.team_list.size(); i++ ){
+        for(i = 0; i < Team1.team_list.size(); i++ ){
             if(Team1.team_list.contains(Team1.team_list.get(i))){  // if team ID already in use
                 Team1 teamObject = Team1.team_list.get(i);
                 if( teamObject.teamID == teamID ){

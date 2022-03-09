@@ -431,7 +431,7 @@ public interface MiniCyclingPortalInterface extends Serializable {
 	 * @throws IDNotRecognisedException If the ID does not match any stage in the
 	 *                                  system.
 	 */
-	LocalTime[] getRankedAdjustedElapsedTimesInStage(int stageId) throws IDNotRecognisedException;
+	int[] getRankedAdjustedElapsedTimesInStage(int stageId) throws IDNotRecognisedException;
 
 	/**
 	 * Get the number of points obtained by each rider in a stage.

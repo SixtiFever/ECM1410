@@ -1,13 +1,10 @@
 import cycling.*;
 
+import java.io.*;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.*;
-import java.util.stream.IntStream;
 
 /**
  * A short program to illustrate an app testing some minimal functionality of a
@@ -19,7 +16,7 @@ import java.util.stream.IntStream;
  * @author Diogo Pacheco
  * @version 1.0
  */
-public class CyclingPortalInterfaceTestApp {
+public class CyclingPortalInterfaceTestApp implements Serializable {
 
 	/**
 	 * Test method.
@@ -67,7 +64,6 @@ public class CyclingPortalInterfaceTestApp {
 
 
 	/** RACE METHODS */
-
 
 	/** NEW
 	 * creates a new race object and adds to allRaces.
@@ -543,6 +539,9 @@ public class CyclingPortalInterfaceTestApp {
 	}
 
 
+	/**
+	 * Clears everything
+	 * */
 	public void eraseCyclingPortal(){
 		int i, j;
 		for( i = 0; i < Race1.allRaces.size(); i++ ){
@@ -559,6 +558,23 @@ public class CyclingPortalInterfaceTestApp {
 		Race1.allRaces.clear();
 	}
 
+
+	/**
+	 * filename = RaceData.ser
+	 * */
+	public void saveCyclingPortal(String filename) throws IOException {
+
+		FileOutputStream fileout = new FileOutputStream("cycling/RaceData.ser");
+		ObjectOutputStream out = new ObjectOutputStream(fileout);
+		out.writeObject(Race1.allRaces);
+	}
+
+
+	public void loadCyclingPortal(String filename) throws IOException {
+		Race1 race = null;
+		FileInputStream filein = new FileInputStream("/Users/JDSwift/Desktop/Assignment/src/RaceData.ser");
+		ObjectInputStream in = new ObjectInputStream(filein);
+	}
 
 
 
