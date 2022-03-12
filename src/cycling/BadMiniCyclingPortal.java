@@ -173,7 +173,7 @@ public class BadMiniCyclingPortal implements MiniCyclingPortalInterface {
 	}
 
 	@Override
-	public LocalTime[] getRankedAdjustedElapsedTimesInStage(int stageId) throws IDNotRecognisedException {
+	public int[] getRankedAdjustedElapsedTimesInStage(int stageId) throws IDNotRecognisedException {
 		// TODO Auto-generated method stub
 		return null;
 	}

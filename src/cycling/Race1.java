@@ -9,7 +9,7 @@ public class Race1 {
     String raceDescription;
     int raceID;
 
-    ArrayList<Stage1> stagesInRace = new ArrayList<>();
+    public ArrayList<Stage1> stagesInRace = new ArrayList<>();
 
     /** STATIC */
     static ArrayList<Race1> allRaces = new ArrayList<>();

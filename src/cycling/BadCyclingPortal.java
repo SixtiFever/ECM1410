@@ -174,7 +174,7 @@ public class BadCyclingPortal implements CyclingPortalInterface {
 	}
 
 	@Override
-	public LocalTime[] getRankedAdjustedElapsedTimesInStage(int stageId) throws IDNotRecognisedException {
+	public int[] getRankedAdjustedElapsedTimesInStage(int stageId) throws IDNotRecognisedException {
 		// TODO Auto-generated method stub
 		return null;
 	}

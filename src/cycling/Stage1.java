@@ -21,7 +21,7 @@ public class Stage1 {
     ArrayList<Integer> riderResults = new ArrayList<>();
     ArrayList<Integer> rankedRiderTimes = new ArrayList<>();
 
-    HashMap<Integer, LocalTime[]> riderTime = new HashMap<>();
+    public HashMap<Integer, LocalTime[]> riderTime = new HashMap<>();
 
     Stage1(String stageName, String stageDescription, StageType type){
         this.stageName = stageName;

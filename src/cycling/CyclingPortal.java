@@ -11,21 +11,34 @@ public class CyclingPortal implements Serializable, MiniCyclingPortalInterface {
 
     /** RACE METHODS */
 
-    /** NEW
+    /** createRace()
+     * <p>
      * creates a new race object and adds to allRaces.
-     * assigns raceID of the allRaces.size()
+     * raceID = current allRaces.size()
+     * </p>
+     * @author Jason Swift
      * */
-    public int createRace(String name, String description) {
+    @Override
+    public int createRace(String name, String description) throws IllegalNameException, InvalidNameException {
         Race1 race = new Race1(name, description);
-        Race1.allRaces.add(race);
+        try{
+            Race1.allRaces.add(race);
+        } catch ( Exception exc){
+            System.out.println("Race already registered: " + exc);
+            return 0;
+        }
         race.raceID = Race1.allRaces.size();
         return race.raceID;
     }
 
-    /**
+    /** getRaceIDs()
+     * <p>
      * returns array of raceIDs currently on platform
      * if none, return null.
+     * </p>
+     * @author Jason Swift
      * */
+    @Override
     public int[] getRaceIds() {
         if (Race1.allRaces.size() == 0) {
             System.out.println("No races active on platform.");
@@ -40,16 +53,27 @@ public class CyclingPortal implements Serializable, MiniCyclingPortalInterface {
     }
 
 
-    /** NEW
+    /** addStageToRace()
+     * <p>
      * adds a stage to the race -> Get race object via getRaceWithID(raceID)
      * add to stages list in race object
-     * returns concat of raceID and stageList.size()
+     * returns concatenation of raceID and stageList.size() e.g 12 --> RaceID = 1, stageList.size() = 2
+     * </p>
+     * @author Jason Swift
      * */
-    public int addStageToRace(int raceID, String stageName, String stageDescription, double length, LocalDateTime startTime, StageType type){
+    @Override
+    public int addStageToRace(int raceID, String stageName, String stageDescription, double length, LocalDateTime startTime, StageType type)
+            throws IDNotRecognisedException, IllegalNameException, InvalidNameException, InvalidLengthException {
         Stage1 stage = new Stage1(stageName, stageDescription, type); // create a new stage object
         stage.length = length;
         stage.startTime = startTime;
-        Race1 raceObject = getRaceWithID(raceID); // grab race to add to
+        Race1 raceObject;
+        try {
+            raceObject = getRaceWithID(raceID); // grab race to add to
+        } catch (Exception exc){
+            System.out.println("Invalid race ID:" + exc);
+            return 0;
+        }
         raceObject.stagesInRace.add(stage); // add to stages in race
         // Assign stage ID
         String stringRaceID = Integer.toString(raceID);
@@ -59,18 +83,25 @@ public class CyclingPortal implements Serializable, MiniCyclingPortalInterface {
         return stage.stageID;
     }
 
-    /** NEW
+    /** removeRaceById()
+     * <p>
      * Removes from static race_list member in race class
+     * </p>
+     * @author Jason Swift
      * */
-    public void removeRaceById(int raceID){
+    @Override
+    public void removeRaceById(int raceID) throws IDNotRecognisedException {
         Race1.allRaces.remove(raceID);
     }
 
 
-    /** NEW
+    /** removeRaceByName()
+     * <p>
      * iterates allRaces, extracts race with argument raceName. Removes from ArrayList.
+     * </p>
+     * @author Jason Swift
      * */
-    public void removeRaceByName(String raceName){
+    public void removeRaceByName(String raceName) throws NameNotRecognisedException {
         int i;
         for(i = 0; i < Race1.allRaces.size(); i++ ){
             if( raceName == Race1.allRaces.get(i).raceName){
@@ -79,21 +110,22 @@ public class CyclingPortal implements Serializable, MiniCyclingPortalInterface {
             }
         }
         System.out.println("Race not found....");
-        return;
     }
 
 
-    /** NEW
-     *
-     * getRaceStages
+    /** getRaceStages()
+     * <p>
      * Takes in raceID and returns an array of stageID from that race.
      * Uses if statement to ensure that raceID exists. If invalid raceID is input, returns out
      * of method with empty array.
      * Creates local raceObject located in race_list at index of the argument raceID.
      * Then iterates through the race_stages.length and appends all to new array.
      * new array is returned
+     * </p>
+     * @author Jason Swift
      * */
-    public int[] getRaceStages(int raceID){
+    @Override
+    public int[] getRaceStages(int raceID) throws IDNotRecognisedException {
         int i;
         if(Race1.allRaces.size() < raceID){
             System.out.println("raceID exceeds number of races... Try another ID");
@@ -113,83 +145,126 @@ public class CyclingPortal implements Serializable, MiniCyclingPortalInterface {
     }
 
 
-    /** NEW
+    /** removeStageById()
+     * <p>
      * Iterated a nested for-loop in search of stageID. If found... removes
+     * </p>
+     * @author Jason Swift
      * */
-    public void removeStageById(int stageID) {
+    @Override
+    public void removeStageById(int stageID) throws IDNotRecognisedException {
         int i,j;
-
-        for(i = 0; i < Race1.allRaces.size(); i++ ) {
-            Race1 raceObject = Race1.allRaces.get(i);
-            for (j = 0; j < raceObject.stagesInRace.size(); j++) {
-                if (stageID == raceObject.stagesInRace.get(j).stageID) {
-                    raceObject.stagesInRace.remove(j);
+        try{
+            for(i = 0; i < Race1.allRaces.size(); i++ ) {
+                Race1 raceObject = Race1.allRaces.get(i);
+                for (j = 0; j < raceObject.stagesInRace.size(); j++) {
+                    if (stageID == raceObject.stagesInRace.get(j).stageID) {
+                        raceObject.stagesInRace.remove(j);
+                        return;
+                    }
                 }
             }
+        } catch (Exception exc) {
+            System.out.println("Stage ID not found: " + exc);
         }
     }
 
 
-    /**  NEW
+    /**  getStageLength()
+     * <p>
      * nested for loop to iterate all races and then stage list until matched a stageID
      * returns the length of that stage ID
+     * </p>
+     * @author Jason Swift
      * */
-    public double getStageLength(int stageID) {
+    @Override
+    public double getStageLength(int stageID) throws IDNotRecognisedException {
         int i,j;
         double length = 0.0;
 
-        for(i = 0; i < Race1.allRaces.size(); i++) {
-            Race1 raceObject = Race1.allRaces.get(i);
-            for( j = 0; j < raceObject.stagesInRace.size(); j++ ){
-                if( stageID == raceObject.stagesInRace.get(j).stageID ) {
-                    length = raceObject.stagesInRace.get(j).length;
-                    break;
+        try {
+            for(i = 0; i < Race1.allRaces.size(); i++) {
+                Race1 raceObject = Race1.allRaces.get(i);
+                for( j = 0; j < raceObject.stagesInRace.size(); j++ ){
+                    if( stageID == raceObject.stagesInRace.get(j).stageID ) {
+                        length = raceObject.stagesInRace.get(j).length;
+                        break;
+                    }
                 }
             }
+            return length;
+        } catch (Exception exc){
+            System.out.println("Stage ID not found: " + exc);
+            return 0.0;
         }
-        return length;
     }
 
 
 
-    /** NEW */
 
-    /**
+    /** viewRaceDetails()
+     * <p>
      * argument = raceID --> find from race_list
      * sumOfStages gives total length of all stages
      * returns all as a String
+     * </p>
+     * @author Jason Swift
      * */
-    public String viewRaceDetails(int raceID) {
-
-        Race1 raceObject = getRaceWithID(raceID);
-
-        return "Race ID : " + raceObject.raceID + " | Race name: " + raceObject.raceName + " | Race Description: " + raceObject.raceDescription
-                + " | Number of stages: " + raceObject.stagesInRace.size() + " | Total length: " + raceObject.sumOfstages();
+    @Override
+    public String viewRaceDetails(int raceID) throws IDNotRecognisedException {
+        Race1 raceObject;
+        try{
+            raceObject = getRaceWithID(raceID);
+            return "Race ID : " + raceObject.raceID + " | Race name: " + raceObject.raceName + " | Race Description: " + raceObject.raceDescription
+                    + " | Number of stages: " + raceObject.stagesInRace.size() + " | Total length: " + raceObject.sumOfstages();
+        } catch (Exception exc) {
+            return "Invalid raceID: " + exc;
+        }
     }
 
 
-    /** NEW
-     *
+    /** addIntermediateSprintToStage()
+     * <p>
+     * instantiates segment object and adds to stage object,
+     * identified by the stageID argument.
+     * returns a segment ID
+     * </p>
+     * @author Jason Swift
      * */
-    public int addIntermediateSprintToStage(int stageID, double location) {
-        Stage1 stageObject = locateStageObject(stageID);
-        Segment1 segObject = new Segment1(location);
-        stageObject.stageSegments.add(segObject);
+    @Override
+    public int addIntermediateSprintToStage(int stageID, double location) throws IDNotRecognisedException,
+            InvalidLocationException, InvalidStageStateException, InvalidStageTypeException {
+        try{
+            Stage1 stageObject = locateStageObject(stageID);
+            Segment1 segObject = new Segment1(location);
+            stageObject.stageSegments.add(segObject);
 
-        // creating segID via concatenation to stageIDs
-        String segIDString = String.valueOf(stageID) + String.valueOf(stageObject.stageSegments.size());
-        int segID = Integer.parseInt(segIDString);
-        segObject.segmentID = segID;
-        return segID;
-
+            // creating segID via concatenation to stageIDs
+            String segIDString = String.valueOf(stageID) + String.valueOf(stageObject.stageSegments.size());
+            int segID = Integer.parseInt(segIDString);
+            segObject.segmentID = segID;
+            return segID;
+        } catch (Exception exc){
+            System.out.println("Stage ID error: " + exc);
+            return 0;
+        }
     }
 
 
 
-    /** NEW
-     *
+    /** addCategorizedClimbToStage()
+     * <p>
+     * instantiates segment object, and sets fields based on
+     * arguments. Then appends to the segments of the stage object,
+     * as selected by the stageID that was input.
+     * returns a segment ID
+     * </p>
+     * @author Jason Swift
      * */
-    public int addCategorizedClimbToStage(int stageID, Double location, SegmentType type, Double averageGradient, Double length ) {
+    @Override
+    public int addCategorizedClimbToStage(int stageID, Double location, SegmentType type, Double averageGradient, Double length )
+            throws IDNotRecognisedException, InvalidLocationException, InvalidStageStateException,
+            InvalidStageTypeException {
         Stage1 stageObject = locateStageObject(stageID);  // grabbing correct stage object
         Segment1 segObject = new Segment1(location);  // instantiating segment instance
         segObject.segType = type;
@@ -205,11 +280,15 @@ public class CyclingPortal implements Serializable, MiniCyclingPortalInterface {
     }
 
 
-    /** NEW
+    /** removeSegment()
+     * <p>
      * removes the segment from the first race, and first stage within the race.
      * Can be altered via hardcoding
+     * </p>
+     * @author Jason Swift
      * */
-    public void removeSegment(int segID) {
+    @Override
+    public void removeSegment(int segID) throws IDNotRecognisedException {
         int i,j,k;
         for(i = 0; i < Race1.allRaces.size(); i++ ){
             Race1 raceObject = Race1.allRaces.get(i);
@@ -219,20 +298,26 @@ public class CyclingPortal implements Serializable, MiniCyclingPortalInterface {
                     Segment1 segObject = stageObject.stageSegments.get(k);
                     if( segID == segObject.segmentID) {
                         stageObject.stageSegments.remove(k);
+                        return;
                     }
                 }
             }
         }
+        System.out.println("Segment ID not found.");
     }
 
 
 
-    /** NEW
-     * isolates stage object
+    /** getStageSegments()
+     * <p>
+     * grab stage object
      * uses for loop to iterate stage segments, and add to new array of type int[]
      * returns stageSegments[];
+     * </p>
+     * @author Jason Swift
      * */
-    public int[] getStageSegments(int stageID){
+    @Override
+    public int[] getStageSegments(int stageID) throws IDNotRecognisedException {
         Stage1 stageObject = locateStageObject(stageID);
         int[] stageSegments = new int[stageObject.stageSegments.size()];
         int i;
@@ -243,20 +328,28 @@ public class CyclingPortal implements Serializable, MiniCyclingPortalInterface {
     }
 
 
-    /** NEW
+    /** getNumberOfStages()
+     * <p>
      * returns the number of stages for a race
+     * </p>
+     * @author Jason Swift
      * */
-    public int getNumberOfStages(int raceID){
+    @Override
+    public int getNumberOfStages(int raceID) throws IDNotRecognisedException {
         Race1 raceObject = getRaceWithID(raceID);
         int noOfStages = raceObject.stagesInRace.size();
         return noOfStages;
     }
 
 
-    /**
-     * ridiculously vague method.... No idea what to put in here.
+    /** concludeStagePreparation()
+     * <p>
+     * I don't understand this method
+     * </p>
+     * @author Jason Swift
      * */
-    public void concludeStagePreparation(int stageID){
+    @Override
+    public void concludeStagePreparation(int stageID) throws IDNotRecognisedException {
         Stage1 stageObject = Race1.allRaces.get(0).stagesInRace.get(stageID);
     }
 
@@ -270,7 +363,17 @@ public class CyclingPortal implements Serializable, MiniCyclingPortalInterface {
 
 
 
-    public int createTeam(String teamName, String teamDescription){
+    /** createTeam()
+     * <p>
+     * takes in name and description, and instantiates team object with arguments.
+     * checks for whether team name already exists
+     * adds team to the team list
+     * returns a team ID
+     * </p>
+     * @author Jason Swift
+     * */
+    @Override
+    public int createTeam(String teamName, String teamDescription) throws IllegalNameException, InvalidNameException {
         Team1 team = new Team1(teamName, teamDescription);
         int teamID = 0;
 
@@ -287,12 +390,16 @@ public class CyclingPortal implements Serializable, MiniCyclingPortalInterface {
 
 
 
-    /**
+    /** removeTeam()
+     * <p>
      * remove team by ID
      * iterates for loop, comparing Team ID. Removes if equal.
      * If not found, throws error
+     * </p>
+     * @author Jason Swift
      * */
-    public void removeTeam(int teamID) {
+    @Override
+    public void removeTeam(int teamID) throws IDNotRecognisedException {
         int i;
         for(i = 0; i < Team1.team_list.size(); i++ ){
             if( teamID == Team1.team_list.get(i).teamID){
@@ -307,7 +414,15 @@ public class CyclingPortal implements Serializable, MiniCyclingPortalInterface {
 
 
 
-    public int createRider(int teamID, String riderName, int yearOfBirth){
+    /** createRider()
+     * <p>
+     * instantiates a rider and allocates it to the team based on teamID argument
+     * returns a unique riderID via method assignRiderID()
+     * </p>
+     * @author Jason Swift
+     * */
+    @Override
+    public int createRider(int teamID, String riderName, int yearOfBirth) throws IDNotRecognisedException, IllegalArgumentException {
 
         Rider1 rider = new Rider1(riderName, yearOfBirth); // instantiate new rider
         if(!Rider1.checkForTeamID(teamID)){  //
@@ -321,11 +436,15 @@ public class CyclingPortal implements Serializable, MiniCyclingPortalInterface {
     }
 
 
-    /**
+    /** removeRider()
+     * <p>
      * iterate all riderIDs in all teams.
      * returns the rider object to be removed
+     * </p>
+     * @author Jason Swift
      * */
-    public void removeRider(int riderID){
+    @Override
+    public void removeRider(int riderID) throws IDNotRecognisedException {
         int i;
         int j;
         for(i = 0; i < Team1.team_list.size(); i++) {  // iterate team_list
@@ -346,10 +465,14 @@ public class CyclingPortal implements Serializable, MiniCyclingPortalInterface {
     }
 
 
-    /**
+    /** getTeams()
+     * <p>
      * extracts teamID's from the team objects in the teams list
+     * </p>
+     * @author Jason Swift
      * */
-    public int[] getTeams() {
+    @Override
+    public int[] getTeams()  {
         int i;
         int[] teamIDArray = new int[Team1.team_list.size()];
         for(i = 0; i < Team1.team_list.size(); i++ ) {
@@ -360,11 +483,15 @@ public class CyclingPortal implements Serializable, MiniCyclingPortalInterface {
     }
 
 
-    /**
+    /** getTeamRiders()
+     * <p>
      * iterate through team members array of a given teamID
      * return riders of the team
+     * </p>
+     * @author Jason Swift
      */
-    public int[] getTeamRiders(int teamID) {
+    @Override
+    public int[] getTeamRiders(int teamID) throws IDNotRecognisedException {
         int i;
         Team1 teamObject = getObjectWithTeamID(teamID);
         int[] teamRiderIDs = new int[teamObject.teamMembers.size()];
@@ -378,11 +505,16 @@ public class CyclingPortal implements Serializable, MiniCyclingPortalInterface {
 
     /** RESULT RECORDING */
 
-    /**
+    /** registerRiderResultsInStage()
+     * <p>
      * params: riderID, stageID, LocalTime array of times
      * HashMap --> RiderID : Time to complete stage (seconds)
+     * </p>
+     * @author Jason Swift
      * */
-    public void registerRiderResultsInStage(int stageID, int riderID, LocalTime[] checkpoints) {
+    @Override
+    public void registerRiderResultsInStage(int stageID, int riderID, LocalTime[] checkpoints) throws IDNotRecognisedException, DuplicatedResultException, InvalidCheckpointsException,
+            InvalidStageStateException {
         Stage1 stageObject = locateStageObject(stageID); // stage instance
         Rider1 riderObject = findRider(riderID); // rider instance
         Integer wrappedRiderID = riderObject.riderID;
@@ -411,10 +543,14 @@ public class CyclingPortal implements Serializable, MiniCyclingPortalInterface {
     }
 
 
-    /**
+    /** getRiderResultsInStage()
+     * <p>
      * returns the LocalTime[] checkpoint times of the rider in that stage
+     * </p>
+     * @author Jason Swift
      * */
-    public LocalTime[] getRiderResultsInStage(int stageID, int riderID) {
+    @Override
+    public LocalTime[] getRiderResultsInStage(int stageID, int riderID) throws IDNotRecognisedException {
         Stage1 stageObject = locateStageObject(stageID);
         if( stageObject.riderTime.get(riderID) == null ){
             return new LocalTime[0];
@@ -422,10 +558,13 @@ public class CyclingPortal implements Serializable, MiniCyclingPortalInterface {
         return stageObject.riderTime.get(riderID);
     }
 
-    /**
+    /** getRidersGeneralClassificationRank()
+     * <p>
      * returns the LocalTime[] checkpoint times of the rider in that stage
+     * </p>
+     * @author Jason Swift
      * */
-    public LocalTime[] getRidersGeneralClassificationRank(int stageID, int riderID) {
+    public LocalTime[] getRidersGeneralClassificationRank(int stageID, int riderID) throws IDNotRecognisedException {
         Stage1 stageObject = locateStageObject(stageID);
         if( stageObject.riderTime.get(riderID) == null ){
             return new LocalTime[0];
@@ -434,10 +573,14 @@ public class CyclingPortal implements Serializable, MiniCyclingPortalInterface {
     }
 
 
-    /**
+    /** getRiderAdjustedElapsedTime()
+     * <p>
      * converts second into seconds of the day
+     * </p>
+     * @author Jason Swift
      * */
-    public LocalTime getRiderAdjustedElapsedTimeInStage(int stageID, int riderID){
+    @Override
+    public LocalTime getRiderAdjustedElapsedTimeInStage(int stageID, int riderID) throws IDNotRecognisedException {
         Stage1 stageObject = locateStageObject(stageID);
         LocalTime[] riderTimes = stageObject.riderTime.get(riderID);
         Long seconds = ChronoUnit.SECONDS.between(riderTimes[0], riderTimes[riderTimes.length-1]);
@@ -445,20 +588,27 @@ public class CyclingPortal implements Serializable, MiniCyclingPortalInterface {
     }
 
 
-    /**
+    /** deleteRiderResultsInStage()
+     * <p>
      * delete rider in stage HashMap
+     * </p>
+     * @author Jason Swift
      * */
-    public void deleteRiderResultsInStage(int stageID, int riderID) {
+    @Override
+    public void deleteRiderResultsInStage(int stageID, int riderID) throws IDNotRecognisedException {
         Stage1 stageObject = locateStageObject(stageID);
         stageObject.riderTime.remove(riderID);
     }
 
 
-    /**
+    /** getRidersRankInStage()
+     * <p>
      * getRidersRanks
-     *
+     * </p>
+     * @author Jason Swift
      * */
-    public int[] getRidersRankInStage(int stageID){
+    @Override
+    public int[] getRidersRankInStage(int stageID) throws IDNotRecognisedException {
         Stage1 stageObject = locateStageObject(stageID);
         int[] riderResulstsArray = new int[200];
         int i;
@@ -469,7 +619,11 @@ public class CyclingPortal implements Serializable, MiniCyclingPortalInterface {
     }
 
 
-    public int[] getRankedAdjustedElapsedTimesInStage(int stageID) {
+    /** getRankedAdjustedElapsedTimeInStage()
+     * @author Jason Swift
+     * */
+    @Override
+    public int[] getRankedAdjustedElapsedTimesInStage(int stageID) throws IDNotRecognisedException {
         Stage1 stageObject = locateStageObject(stageID);
         int[] riderTimes = new int[stageObject.rankedRiderTimes.size()];
         int i;
@@ -480,13 +634,16 @@ public class CyclingPortal implements Serializable, MiniCyclingPortalInterface {
     }
 
 
-    /** getRidersPointsInStage
+    /** getRidersPointsInStage()
+     * <p>
      * Allocate rider points based on their position in the rankedRiderTimes array.
      * Check stageType and position --> Then allocate required points
      * return the list
+     * </p>
+     * @author Jason Swift
      * */
-
-    public int[] getRidersPointsInStage(int stageID) {
+    @Override
+    public int[] getRidersPointsInStage(int stageID) throws IDNotRecognisedException {
         Stage1 stageObject = locateStageObject(stageID);
         int[] riderPoints = new int[stageObject.rankedRiderTimes.size()];
         int i;
@@ -498,10 +655,14 @@ public class CyclingPortal implements Serializable, MiniCyclingPortalInterface {
     }
 
 
-    /**
+    /** getRidersMountainPointsInStage()
+     * <p>
      * get mountain points
+     * </p>
+     * @author Jason Swift
      * */
-    public int[] getRidersMountainPointsInStage(int stageID) {
+    @Override
+    public int[] getRidersMountainPointsInStage(int stageID) throws IDNotRecognisedException {
         Stage1 stageObject = locateStageObject(stageID);
         int[] riderMountainPoints = new int[stageObject.rankedRiderTimes.size()];
         int i;
@@ -513,9 +674,13 @@ public class CyclingPortal implements Serializable, MiniCyclingPortalInterface {
     }
 
 
-    /**
+    /** eraseCyclingPortal()
+     * <p>
      * Clears everything
+     * </p>
+     * @author Jason Swift
      * */
+    @Override
     public void eraseCyclingPortal(){
         int i, j;
         for(i = 0; i < Race1.allRaces.size(); i++ ){
@@ -533,9 +698,10 @@ public class CyclingPortal implements Serializable, MiniCyclingPortalInterface {
     }
 
 
-    /**
-     * filename = RaceData.ser
+    /** saveCyclingPortal()
+     * @author Jason Swift
      * */
+    @Override
     public void saveCyclingPortal(String filename) throws IOException {
 
         FileOutputStream fileout = new FileOutputStream("cycling/RaceData.ser");
@@ -544,6 +710,10 @@ public class CyclingPortal implements Serializable, MiniCyclingPortalInterface {
     }
 
 
+    /** loadCyclingPortal()
+     * @author Jason Swift
+     * */
+    @Override
     public void loadCyclingPortal(String filename) throws IOException {
         Race1 race = null;
         FileInputStream filein = new FileInputStream("/Users/JDSwift/Desktop/Assignment/src/RaceData.ser");
@@ -559,10 +729,13 @@ public class CyclingPortal implements Serializable, MiniCyclingPortalInterface {
     /** EXTRA METHODS */
 
 
-    /**
+    /** assignRiderID()
+     * <p>
      * get teamObject from teamID --> Assign teamID as first element of riderID
      * get riderID from teamMembers ArrayList.size() --> Assign string int as second element.
-     * cast back to int in return. This bypasses arithematic operators to ensure concatination, not addition.
+     * cast back to int in return. This bypasses arithematic operators to ensure concatenation, not addition.
+     * </p>
+     * @author Jason Swift
      * */
     public int assignRiderID(int teamID){
         Team1 teamObject = getObjectWithTeamID(teamID);
@@ -571,6 +744,13 @@ public class CyclingPortal implements Serializable, MiniCyclingPortalInterface {
     }
 
 
+    /** checkForName()
+     * <p>
+     * Boolean method
+     * iterated static team list, comparing team names with argument
+     * </p>
+     * @author Jason Swift
+     * */
     boolean checkForName(String teamName){
         int i;
         for(i = 0; i < Team1.team_list.size(); i++ ){
@@ -583,6 +763,13 @@ public class CyclingPortal implements Serializable, MiniCyclingPortalInterface {
     }
 
 
+    /** getObjectWithTeamID
+     * <p>
+     * param: teamID
+     * returns the team object that has the ID that matches with the argument.
+     * </p>
+     * @author Jason Swift
+     * */
     public Team1 getObjectWithTeamID(int teamID){
         int i;
         for(i = 0; i < Team1.team_list.size(); i++ ){
@@ -593,6 +780,13 @@ public class CyclingPortal implements Serializable, MiniCyclingPortalInterface {
         return null;
     }
 
+    /** getRaceWithID()
+     * <p>
+     * returns race object that has a raceID that matches
+     * the argument
+     * </p>
+     * @author Jason Swift
+     * */
     public Race1 getRaceWithID(int raceID) {
         int i;
         for(i = 0; i < Race1.allRaces.size(); i++ ){
@@ -603,6 +797,13 @@ public class CyclingPortal implements Serializable, MiniCyclingPortalInterface {
         return null;
     }
 
+    /** locateStageObject()
+     * <p>
+     * nested for loop to locate the stageID that
+     * matches the argument
+     * </p>
+     * @author Jason Swift
+     * */
     public Stage1 locateStageObject(int stageID ) {
         int i,j;
         for(i = 0; i < Race1.allRaces.size(); i++ ){
@@ -619,6 +820,14 @@ public class CyclingPortal implements Serializable, MiniCyclingPortalInterface {
     }
 
 
+    /** findRider()
+     * <p>
+     * param: riderID
+     * compares all rider IDs and returns
+     * the object with the matched riderID
+     * </p>
+     * @author Jason Swift
+     * */
     public Rider1 findRider(int riderID) {
         int i,j;
         for(i = 0; i < Team1.team_list.size(); i++ ){
